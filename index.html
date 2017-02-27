@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html ng-app="plunker">
+
+  <head>
+    <meta charset="utf-8" />
+    <title>AngularJS Plunker</title>
+    <link data-require="bootstrap@*" data-semver="3.3.2" rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap.min.css" />
+    <link href="http://fonts.googleapis.com/css?family=Open+Sans:300,400" rel="stylesheet" type="text/css" />
+    <link rel="stylesheet" href="/lib/w3.css" />
+    <script>
+    document.write('<base href="' + document.location + '" />');
+  </script>
+    <link rel="stylesheet" href="style.css" />
+    <script data-require="angular.js@1.4.x" src="https://code.angularjs.org/1.4.0-rc.2/angular.js" data-semver="1.4.0-rc.2"></script>
+    <script data-require="jquery@2.1.3" data-semver="2.1.3" src="http://code.jquery.com/jquery-2.1.3.min.js"></script>
+    <script data-require="bootstrap@*" data-semver="3.3.2" src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.2/js/bootstrap.min.js"></script>
+    <script data-require="angular-resource@*" data-semver="1.4.8" src="https://code.angularjs.org/1.4.8/angular-resource.js"></script>
+    <script src="app.js"></script>
+  </head>
+
+  <body ng-controller="MainCtrl">
+    <div class="container">
+      <h1 class="firstWord">Home        <span class="secondWord">Banking</span>
+      </h1>
+      <hr />
+      <h4 class="alert alert-default" ng-bind-template="Hola {{persona.nombre}}"></h4>
+      <div class="row">
+        <div class="col-md-12">
+         
+          <hr />
+          <div class="panel panel-default">
+            <div class="panel-heading">
+              <h3 class="panel-title">Cuentas</h3>
+            </div>
+            <div class="panel-body">
+              <table class="table table-striped table-bordered table-condensed">
+                <thead>
+                  <tr>
+                    <th>Nombre</th>
+                    <th>Saldo</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr ng-repeat="row in persona.cuentas">
+                    <!--<td>{{row['nombre']}}</td>-->
+                    <td ng-bind="row.nombre"></td>
+                    <td ng-bind="row.saldo | currency"></td>
+                    <td>
+                      <button type="button" class="btn btn-sm btn-danger" ng-confirm-click="¿Seguro que desea eliminar?" ng-click="eliminar(persona.cuentas, row.nombre)">X</button>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+              <button type="button" class="btn btn-primary" ng-click="alternarTransferir()">Transferir</button>
+              <button type="button" class="btn btn-primary" ng-click="alternarDepositar()">Depositar</button>
+              <button type="button" class="btn btn-primary" ng-click="alternarNuevaCuenta()">Nueva</button>
+            </div>
+          </div>
+          <form ng-hide="ocultarTransferir">
+            <div class="panel panel-default">
+              <div class="panel-heading">
+                <h3 class="panel-title">Transferir</h3>
+              </div>
+              <div class="panel-body">
+                <label>Desde:</label>
+                <select class="w3-input w3-border" ng-model="cuentadesde">
+                  <option ng-repeat="cuenta in persona.cuentas" value="{{cuenta.nombre}}">
+                  {{cuenta.nombre}}
+                </option>
+                </select>
+                <label>Hasta:</label>
+                <select class="w3-input w3-border" ng-model="cuentahasta">
+                  <option ng-repeat="cuenta in persona.cuentas" value="{{cuenta.nombre}}">
+                  {{cuenta.nombre}}
+                </option>
+                </select>
+                <input class="w3-input w3-border" type="number" ng-model="cantidad" placeholder="0" />
+                <button type="button" class="btn btn-secondary" ng-click="transferir(cuentadesde, cuentahasta, cantidad)">Transferir</button>
+              </div>
+            </div>
+          </form>
+          <form ng-hide="ocultarDepositar">
+            <div class="panel panel-default">
+              <div class="panel-heading">
+                <h3 class="panel-title">Depositar</h3>
+              </div>
+              <div class="panel-body">
+                <label>Cuenta:</label>
+                <select class="w3-input w3-border" ng-model="cuenta">
+                  <option ng-repeat="cuenta in persona.cuentas" value="{{cuenta.nombre}}">
+                  {{cuenta.nombre}}
+                </option>
+                </select>
+                <input class="w3-input w3-border" type="number" ng-model="cantidad" placeholder="0" />
+                <button type="button" class="btn btn-secondary" ng-click="depositar(cuenta, cantidad)">Depositar</button>
+              </div>
+            </div>
+          </form>
+          <form ng-hide="ocultarNuevaCuenta">
+            <div class="panel panel-default">
+              <div class="panel-heading">
+                <h3 class="panel-title">Nueva Cuenta</h3>
+              </div>
+              <div class="panel-body">
+                <label>Nombre:</label>
+                <input class="w3-input w3-border" type="text" ng-model="nombre" />
+                <button type="button" class="btn btn-secondary" ng-click="nuevacuenta(nombre)">Crear</button>
+              </div>
+            </div>
+          </form>
+          <div class="panel panel-default">
+            <div class="panel-heading">
+              <h3 class="panel-title">Tarjetas</h3>
+            </div>
+            <div class="panel-body">
+              <table class="table table-striped table-bordered table-condensed">
+                <thead>
+                  <tr>
+                    <th>Nombre</th>
+                    <th>Saldo Actual</th>
+                    <th>Saldo Maximo</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr ng-repeat="row in persona.tarjetas">
+                    <!--<td>{{row['nombre']}}</td>-->
+                    <td ng-bind="row.nombre"></td>
+                    <td ng-bind="row.saldoActual | currency"></td>
+                    <td ng-bind="row.saldoMaximo | currency"></td>
+                    <td>
+                      <button type="button" class="btn btn-sm btn-danger" ng-click="eliminar(persona.tarjetas, row.nombre)" ng-confirm-click="¿Seguro que desea eliminar?">X</button>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+              <button type="button" class="btn btn-primary" ng-click="alternarPagarTarjeta()">Pagar Tarjeta</button>
+              <button type="button" class="btn btn-primary" ng-click="ocultarNuevaTarjeta = !ocultarNuevaTarjeta">Nueva</button>
+            </div>
+          </div>
+          <form ng-hide="ocultarPagarTarjeta">
+            <div class="panel panel-default">
+              <div class="panel-heading">
+                <h3 class="panel-title">PagarTarjeta</h3>
+              </div>
+              <div class="panel-body">
+                <label>Desde:</label>
+                <select class="w3-input w3-border" ng-model="cuentadesde">
+                  <option ng-repeat="cuenta in persona.cuentas" value="{{cuenta.nombre}}">
+                  {{cuenta.nombre}}
+                </option>
+                </select>
+                <label>Hasta:</label>
+                <select class="w3-input w3-border" ng-model="tarjetahasta">
+                  <option ng-repeat="tarjeta in persona.tarjetas" value="{{tarjeta.nombre}}">
+                  {{tarjeta.nombre}}
+                </option>
+                </select>
+                <input class="w3-input w3-border" type="number" ng-model="cantidad" placeholder="0" />
+                <button type="button" class="btn btn-secondary" ng-click="pagarTarjeta(cuentadesde, tarjetahasta, cantidad)">Pagar</button>
+              </div>
+            </div>
+          </form>
+          <form ng-hide="ocultarNuevaTarjeta">
+            <div class="panel panel-default">
+              <div class="panel-heading">
+                <h3 class="panel-title">Nueva Tarjeta</h3>
+              </div>
+              <div class="panel-body">
+                <label>Nombre:</label>
+                <input class="w3-input w3-border" type="text" ng-model="nombre" />
+                <label>Saldo Maximo:</label>
+                <input class="w3-input w3-border" type="number" ng-model="max" placeholder="0" />
+                <button type="button" class="btn btn-secondary" ng-click="nuevatarjeta(nombre, max)">Crear</button>
+              </div>
+            </div>
+          </form>
+          
+          
+          <div class="panel panel-default">
+            <div class="panel-heading">
+              <h3 class="panel-title">Prestamos</h3>
+            </div>
+            <div class="panel-body">
+              <table class="table table-striped table-bordered table-condensed">
+                <thead>
+                  <tr>
+                    <th>Nombre</th>
+                    <th>Cuota Actual</th>
+                    <th>Cuotas</th>
+                    <th>Precio Cuota</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr ng-repeat="row in persona.prestamos">
+                    <!--<td>{{row['nombre']}}</td>-->
+                    <td ng-bind="row.nombre"></td>
+                    <td ng-bind="row.cuota_actual"></td>
+                    <td ng-bind="row.cuotas"></td>
+                    <td ng-bind="row.precio_cuota | currency"></td>
+                    <td>
+                      <button type="button" class="btn btn-sm btn-danger" ng-click="eliminar(persona.prestamos, row.nombre)" ng-confirm-click="¿Seguro que desea eliminar?">X</button>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+              <button type="button" class="btn btn-primary" ng-click="alternarPagarPrestamos()">Pagar</button>
+              <button type="button" class="btn btn-primary" ng-click="ocultarNuevaPrestamo = !ocultarNuevaPrestamo">Pedir</button>
+            </div>
+          </div>
+          <form ng-hide="ocultarPagarPrestamos">
+            <div class="panel panel-default">
+              <div class="panel-heading">
+                <h3 class="panel-title">PagarTarjeta</h3>
+              </div>
+              <div class="panel-body">
+                <label>Desde:</label>
+                <select class="w3-input w3-border" ng-model="cuentadesde">
+                  <option ng-repeat="cuenta in persona.cuentas" value="{{cuenta.nombre}}">
+                  {{cuenta.nombre}}
+                </option>
+                </select>
+                <label>Hasta:</label>
+                <select class="w3-input w3-border" ng-model="prestamohasta">
+                  <option ng-repeat="prestamo in persona.prestamos" value="{{prestamo.nombre}}">
+                  {{prestamo.nombre}}
+                </option>
+                </select>
+                <input class="w3-input w3-border" type="number" ng-model="cantidad" placeholder="0" />
+                <button type="button" class="btn btn-secondary" ng-click="pagarPrestamo(cuentadesde, prestamohasta, cantidad)">Pagar</button>
+              </div>
+            </div>
+          </form>
+          
+          <form ng-hide="ocultarNuevaPrestamo">
+            <div class="panel panel-default">
+              <div class="panel-heading">
+                <h3 class="panel-title">Nuevo Prestamo</h3>
+              </div>
+              <div class="panel-body">
+                <label>Nombre:</label>
+                <input class="w3-input w3-border" type="text" ng-model="nombre" />
+                <label>Saldo Total:</label>
+                <input class="w3-input w3-border" type="number" ng-model="max" placeholder="0" />
+                <label>Cuotas:</label>
+                <input class="w3-input w3-border" type="number" ng-model="cuotas" placeholder="0" />
+                <button type="button" class="btn btn-secondary" ng-click="nuevoPrestamo(nombre, max, cuotas)">Crear</button>
+              </div>
+            </div>
+          </form>
+          
+          
+          
+          <div class="panel panel-default">
+            <div class="panel-heading">
+              <h3 class="panel-title">Movimientos</h3>
+            </div>
+            <div class="panel-body">
+              <table class="table table-striped table-bordered table-condensed">
+                <thead>
+                  <tr>
+                    <th>Tipo</th>
+                    <th>Descripcion</th>
+                    <th>Cantidad</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr ng-repeat="row in persona.movimientos">
+                    <td ng-bind="row.tipo"></td>
+                    <td ng-bind="row.descripcion"></td>
+                    <td ng-bind="row.cantidad | currency"></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+          
+        </div>
+      </div>
+    </div>
+  </body>
+
+</html>
