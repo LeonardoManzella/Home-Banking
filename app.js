@@ -48,7 +48,13 @@ app.controller('MainCtrl', function($scope, $window) {
         precio_cuota: 200,
         cuota_actual: 1
       }],
-      
+
+      celulares: [{
+        nombre: '15 2020 8080',
+        saldo: 30,
+        vencimiento: new Date("04/16/2017")
+      }],
+
       movimientos: [{
         tipo: 'Pedir Prestamo',
         descripcion: 'Super Prestamo 4 cuotas de 200',
@@ -71,6 +77,7 @@ app.controller('MainCtrl', function($scope, $window) {
   $scope.ocultarNuevaTarjeta = true;
   $scope.ocultarPagarPrestamos = true;
   $scope.ocultarNuevaPrestamo = true;
+  $scope.ocultarCargaCelular = true;
 
 
 
@@ -93,13 +100,17 @@ app.controller('MainCtrl', function($scope, $window) {
   $scope.alternarNuevaTarjeta = function() {
     $scope.ocultarNuevaTarjeta = !$scope.ocultarNuevaTarjeta;
   };
-  
+
   $scope.alternarPagarPrestamos = function() {
     $scope.ocultarPagarPrestamos = !$scope.ocultarPagarPrestamos;
   };
-  
+
   $scope.alternarNuevaPrestamo = function() {
     $scope.ocultarNuevaPrestamo = !$scope.ocultarNuevaPrestamo;
+  };
+
+  $scope.alternar = function(var_boolean) {
+    var_boolean = !var_boolean;
   };
 
   $scope.buscarElemento = function(arr, val, prop) {
@@ -120,24 +131,37 @@ app.controller('MainCtrl', function($scope, $window) {
   };
 
   $scope.modificarCuenta = function(persona, nombreCuenta, valorSumar) {
+    //alert("Modificando Cuenta... Persona:" + persona + " Cuenta:" + nombreCuenta + "valorSumar:" + valorSumar);
     var cuenta = $scope.buscarElemento(persona.cuentas, nombreCuenta, 'nombre');
     cuenta.saldo = cuenta.saldo + valorSumar;
+    //alert("Cuenta Modificada");
   };
 
   $scope.modificarTarjeta = function(persona, nombreTarjeta, valorSumar) {
     var tarjeta = $scope.buscarElemento(persona.tarjetas, nombreTarjeta, 'nombre');
     tarjeta.saldoActual = tarjeta.saldoActual + valorSumar;
   };
-  
+
   $scope.modificarPrestamo = function(persona, nombrePrestamo, valorSumar) {
     //alert(nombrePrestamo);
     var prestamo = $scope.buscarElemento(persona.prestamos, nombrePrestamo, 'nombre');
     //alert(prestamo.nombre + "  " + prestamo.cuota_actual);
-    var cantidad_cuotas = Math.floor( valorSumar / prestamo.precio_cuota );
+    var cantidad_cuotas = Math.floor(valorSumar / prestamo.precio_cuota);
     //alert(cantidad_cuotas);
     prestamo.cuota_actual = prestamo.cuota_actual + cantidad_cuotas;
   };
-  
+
+  $scope.modificarCelular = function(persona, nombreCelular, valorSumar) {
+    //alert(nombreCelular);
+    var celular = $scope.buscarElemento(persona.celulares, nombreCelular, 'nombre');
+    //alert(celular.nombre + "  " + celular.saldo);
+    celular.saldo = celular.saldo + valorSumar;
+    var oneMonth = 30;
+    if (valorSumar > 30) {
+      celular.vencimiento.setDate(celular.vencimiento.getDate() + oneMonth);
+    }
+  };
+
   $scope.nuevoMovimiento = function(tipoMov, descriptMov, cantMov) {
     var nueva = {
       tipo: tipoMov,
@@ -159,7 +183,7 @@ app.controller('MainCtrl', function($scope, $window) {
 
   $scope.depositar = function(cuenta, cantidad) {
     $scope.modificarCuenta($scope.persona, cuenta, +cantidad);
-     $scope.nuevoMovimiento('Deposito', cuenta, cantidad);
+    $scope.nuevoMovimiento('Deposito', cuenta, cantidad);
     $scope.alternarDepositar();
   };
 
@@ -200,7 +224,7 @@ app.controller('MainCtrl', function($scope, $window) {
     $scope.alternarPagarPrestamos();
   };
 
-  
+
   $scope.nuevoPrestamo = function(nombrePrestamo, saldoMax, cuotasMax) {
     var nueva = {
       nombre: nombrePrestamo,
@@ -209,7 +233,15 @@ app.controller('MainCtrl', function($scope, $window) {
       cuota_actual: 0
     };
     $scope.persona.prestamos.push(nueva);
-    $scope.nuevoMovimiento('Pidio Prestamo', cuotasMax + ' Cuotas de ' + saldoMax/cuotasMax, saldoMax);
+    $scope.nuevoMovimiento('Pidio Prestamo', cuotasMax + ' Cuotas de ' + saldoMax / cuotasMax, saldoMax);
     $scope.alternarNuevaPrestamo();
+  };
+
+
+  $scope.cargarCelular = function(cuentadesde, celularhasta, cantidad) {
+    $scope.modificarCuenta($scope.persona, cuentadesde, -cantidad);
+    $scope.modificarCelular($scope.persona, celularhasta, +cantidad);
+    $scope.nuevoMovimiento('Carga Virtual', cuentadesde + ' -> ' + celularhasta, cantidad);
+    $scope.alternar($scope.ocultarCargaCelular);
   };
 });
